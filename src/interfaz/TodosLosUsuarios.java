@@ -1,0 +1,228 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package interfaz;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import org.json.JSONException;
+import org.json.JSONObject;
+import pojos.Usuario;
+
+/**
+ *
+ * @author Paco Miranda
+ */
+public class TodosLosUsuarios extends javax.swing.JFrame {
+    
+    DefaultTableModel modeloTabla;
+    String url = "http://10.30.15.61:8080/api/usuarios";
+
+    /**
+     * Creates new form TodosLosUsuarios
+     */
+    public TodosLosUsuarios() { 
+        
+        modeloTabla=new DefaultTableModel(null, getColumnas());
+        initComponents();
+    }
+    
+    private String[] getColumnas(){
+       String columnas[]=new String[]{"ID", "Nombre", "Apellidos", "Email", "Password"};
+       return columnas;
+    }
+    
+    private void setFilas(){        
+               
+        Object[] fila=new Object[8];            
+        List<Usuario> usuarios = obtenerInformacion(obtenerConexion());
+                
+        usuarios.stream().forEach((usuario) -> {
+            fila[0]=usuario.getId();
+            fila[1]=usuario.getNombre();
+            fila[2]=usuario.getApellidos();
+            fila[3]=usuario.getEmail();
+            fila[4]=usuario.getPassword();
+            
+            modeloTabla.addRow(fila);
+        });
+        
+        
+    }
+    
+    private void limpiarTabla(){
+        DefaultTableModel modeloTabla=(DefaultTableModel) tablaUsuarios.getModel();
+            int filas = tablaUsuarios.getRowCount();
+            for (int i = 0;filas>i; i++) {
+                modeloTabla.removeRow(0);
+            }
+    }
+    
+    private HttpURLConnection obtenerConexion(){
+        HttpURLConnection con= null;
+        try{
+            URL obj = new URL(url);
+            con = (HttpURLConnection) obj.openConnection();
+        }catch(ConnectException ex){
+            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);            
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return con;        
+    }
+    
+    private ArrayList<Usuario> obtenerInformacion(HttpURLConnection con){
+        
+        ArrayList<Usuario> usuarios = new ArrayList<>();
+        
+        try{
+            int responseCode = con.getResponseCode();
+            //System.out.println("Enviando solicitud GET a la url: " + url);
+            //System.out.println(" Response Code: " + responseCode);
+            if(responseCode==200){
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+                while((inputLine = in.readLine()) != null){
+                    response.append(inputLine);
+                }
+                in.close();
+                JSONObject myResponse = new JSONObject(response.toString());
+
+                for (int i = 0; i<myResponse.length(); i++){
+                    JSONObject elementoJSON = new JSONObject(myResponse.getJSONObject(String.valueOf(i)).toString());                
+                    Usuario usuario = new Usuario();
+                    usuario.setId(elementoJSON.getInt("id"));
+                    usuario.setEmail(elementoJSON.getString("email"));
+                    usuario.setPassword(elementoJSON.getString("password"));
+                    usuario.setNombre(elementoJSON.getString("nombre"));
+                    usuario.setApellidos(elementoJSON.getString("apellidos"));
+
+                    usuarios.add(usuario);
+                }
+            }else{
+                JOptionPane.showMessageDialog(this, "Codigo de error: " + responseCode, "Error al obtener los datos", JOptionPane.ERROR_MESSAGE);
+            }
+        }catch(IOException ex){
+            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JSONException ex) {
+            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return usuarios;
+        
+    }    
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        botonUsuarios = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tablaUsuarios = new javax.swing.JTable();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        botonUsuarios.setText("Todos los usuarios");
+        botonUsuarios.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonUsuariosActionPerformed(evt);
+            }
+        });
+
+        tablaUsuarios.setModel(modeloTabla);
+        jScrollPane1.setViewportView(tablaUsuarios);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(48, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(botonUsuarios)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 772, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(45, 45, 45))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addComponent(botonUsuarios)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(21, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void botonUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonUsuariosActionPerformed
+        // TODO add your handling code here:
+        
+        limpiarTabla();
+        setFilas();
+        
+    }//GEN-LAST:event_botonUsuariosActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(TodosLosUsuarios.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(TodosLosUsuarios.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(TodosLosUsuarios.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(TodosLosUsuarios.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new TodosLosUsuarios().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton botonUsuarios;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable tablaUsuarios;
+    // End of variables declaration//GEN-END:variables
+}
