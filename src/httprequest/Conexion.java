@@ -23,7 +23,7 @@ public class Conexion {
     private String url;
     
     public Conexion(){
-        url="http://192.168.0.2:8080/";
+        url="http://10.30.15.57:8080/";
     }
     
     public HttpURLConnection obtenerConexion(String recurso){
