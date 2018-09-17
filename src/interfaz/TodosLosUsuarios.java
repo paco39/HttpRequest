@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import org.json.JSONException;
 import org.json.JSONObject;
 import pojos.Usuario;
+import httprequest.Conexion;
 
 /**
  *
@@ -29,13 +30,15 @@ import pojos.Usuario;
 public class TodosLosUsuarios extends javax.swing.JFrame {
     
     DefaultTableModel modeloTabla;
-    String url = "http://10.30.15.61:8080/api/usuarios";
+    String recurso = "api/usuarios";
+    Conexion conexion;
 
     /**
      * Creates new form TodosLosUsuarios
      */
     public TodosLosUsuarios() { 
         
+        conexion = new Conexion();
         modeloTabla=new DefaultTableModel(null, getColumnas());
         initComponents();
     }
@@ -47,8 +50,8 @@ public class TodosLosUsuarios extends javax.swing.JFrame {
     
     private void setFilas(){        
                
-        Object[] fila=new Object[8];            
-        List<Usuario> usuarios = obtenerInformacion(obtenerConexion());
+        Object[] fila=new Object[8];  
+        List<Usuario> usuarios = obtenerInformacion(conexion.obtenerConexion(recurso));
                 
         usuarios.stream().forEach((usuario) -> {
             fila[0]=usuario.getId();
@@ -70,22 +73,7 @@ public class TodosLosUsuarios extends javax.swing.JFrame {
                 modeloTabla.removeRow(0);
             }
     }
-    
-    private HttpURLConnection obtenerConexion(){
-        HttpURLConnection con= null;
-        try{
-            URL obj = new URL(url);
-            con = (HttpURLConnection) obj.openConnection();
-        }catch(ConnectException ex){
-            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);            
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(TodosLosUsuarios.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return con;        
-    }
-    
+        
     private ArrayList<Usuario> obtenerInformacion(HttpURLConnection con){
         
         ArrayList<Usuario> usuarios = new ArrayList<>();
